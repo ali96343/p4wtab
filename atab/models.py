@@ -48,3 +48,14 @@ if not db(db.test_table).count():
     populate(db.test_table, n=50)
     db.commit()
 
+db.define_table( 'uploaded_files',
+    Field('orig_file_name', requires=IS_NOT_EMPTY(),  ),
+    Field("remark",'text',),
+    Field('uniq_file_name', requires=IS_NOT_EMPTY(),  ),
+    Field('time', 'datetime', editable=False, default = datetime.datetime.now(), requires = IS_DATETIME( )),
+    )
+
+db.commit()
+
+
+

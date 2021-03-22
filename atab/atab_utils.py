@@ -2,30 +2,38 @@ from yatl.helpers import A, I, SPAN, XML, DIV, P, TABLE, THEAD, TR, TD, TBODY, H
 from py4web import URL
 
 
-def sql2table(tbl, db, pg_dict={}, items_on_page=5, caller="index"):
+def stop_button():
+    return A( '!', _title='stop',  _role = 'button', _style="background-color:lightgray;color:black;" )
+
+def sql2table(tbl, db, page_d={}, items_on_page=5, caller="index"):
     # caller = 'sql2table'
     if not tbl in db.tables:
         return f"unknown tbl: {tbl}"
 
     try:
-        pg = int(pg_dict.get("page", 1))
+        pg = int(page_d.get("page", 1))
     except ValueError:
         pg = 1
 
     table_items = len(db(db[tbl].id > 0).select())
+    if table_items == 0:
+           table_items = 1
+
     if items_on_page > table_items:
         items_on_page = table_items
 
     max_pages, rem = divmod( table_items, items_on_page  )
-    if rem : max_pages += 1
+    if rem: 
+        max_pages += 1
 
-    limitby = (pg - 1) * items_on_page, pg * items_on_page
-    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, limitby=limitby)
+    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, 
+              limitby= ( (pg - 1) * items_on_page, pg * items_on_page )  )
 
     headers = [db[tbl][f].label for f in db[tbl].fields]
 
 
     return DIV(
+        SPAN("table_name: ", ),
         SPAN(f"{tbl}", _style="color:red"),
         SPAN(f"; {table_items} rows, {items_on_page} items_on_page"),
         DIV(
@@ -33,12 +41,12 @@ def sql2table(tbl, db, pg_dict={}, items_on_page=5, caller="index"):
                 "prev",
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg)),
-            ) if pg > 1 else A( '!', _role = 'button',  _style="background-color:lightgray;color:black;" ),
+            ) if pg > 1 else stop_button(),
             A(
                 "next",
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
-            ) if pg < max_pages else A( '!', _role = 'button', _style="background-color:lightgray;color:black;" ),
+            ) if pg < max_pages else stop_button(),
         ),
         TABLE(
             THEAD(TR(*[TD(H6(header)) for header in headers])),
@@ -50,7 +58,7 @@ def sql2table(tbl, db, pg_dict={}, items_on_page=5, caller="index"):
 def sql2table_grid(
     tbl,
     db,
-    pg_dict={},
+    page_d={},
     items_on_page=13,
     caller="index",
     csv=False,
@@ -63,20 +71,22 @@ def sql2table_grid(
         return f"unknown tbl: {tbl}"
 
     try:
-        pg = int(pg_dict.get("page", 1))
+        pg = int(page_d.get("page", 1))
     except ValueError:
         pg = 1
 
     table_items = len(db(db[tbl].id > 0).select())
+    if table_items == 0:
+           table_items = 1
     if items_on_page > table_items:
         items_on_page = table_items
 
     max_pages, rem = divmod( table_items, items_on_page  )
-    if rem : max_pages += 1
+    if rem: 
+        max_pages += 1
 
-    limitby = (pg - 1) * items_on_page, pg * items_on_page
-    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, limitby=limitby)
-
+    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, 
+              limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) )
 
     ij_start = -len(links)
     ff = [f for f in db[tbl].fields]
@@ -89,16 +99,19 @@ def sql2table_grid(
             return "act"
         return f"{x}"
 
-    def r_func(x, ii, r, t):
+    def r_func(x, ii, r, t, f_nm):
         if ii < 0:
             if len(links) >= -ii:
                 return links[len(links) + ii](t, r.id)
             return "unk"
         if ii in fld_links:
             return fld_links[ii](t, x, r.id)
+        if f_nm in fld_links:
+            return fld_links[f_nm](t, x, r.id)
         return f"{x}"
 
     return DIV(
+        SPAN("table_name: ", ),
         SPAN(f"{tbl}", _style="color:red"),
         SPAN(f"; {table_items} rows, {items_on_page} items_on_page"),
         DIV(
@@ -122,16 +135,16 @@ def sql2table_grid(
                 "prev",
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg)),
-            ) if pg > 1 else A( '!', _role = 'button', _style="background-color:lightgray;color:black;" ) ,
+            ) if pg > 1 else stop_button() ,
             A(
                 "next",
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
-            ) if pg < max_pages else A( '!', _role = 'button', _style="background-color:lightgray;color:black;"  ) ,
+            ) if pg < max_pages else stop_button(),
         ),
         TABLE(
             THEAD(TR(*[TD(H6(h_func(hh[j], j))) for j in range(ij_start, len(hh))])),
-            TBODY( *[ TR( *[ TD(r_func(row[ff[i]], i, row, tbl)) for i in range(ij_start, len(ff)) ])
+            TBODY( *[ TR( *[ TD(r_func(row[ff[i]], i, row, tbl, ff[i])) for i in range(ij_start, len(ff)) ])
                     for row in rows ]
             ),
         ),
