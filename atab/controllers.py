@@ -1,5 +1,5 @@
 from py4web import action, request, abort, redirect, URL
-from yatl.helpers import A, IMG, DIV, SPAN
+from yatl.helpers import A, IMG, DIV, SPAN, XML, P
 from py4web.core import Template  # , Reloader
 
 from .common import (
@@ -21,7 +21,13 @@ from .atab_utils import sql2table, sql2table_grid
 def index():
     user = auth.get_user()
     message = T("Hello {first_name}".format(**user) if user else "Hello")
-    return dict(message=message)
+    menu = DIV(
+               P( "test-demo for sql2table ( SQLTABLE from web2py)"),
+               A( "sqltable_grid", _role="button", _href=URL('mytab_grid', ),) ,
+               A( "sqltable", _role="button", _href=URL('mytab', ),) ,
+               A( "myupload_file", _role="button", _href=URL('myupload_file', ),) ,
+              )
+    return dict(message=message, menu=menu)
 
 
 @action("mytab", method=["GET", "POST"])
@@ -32,6 +38,13 @@ def mytab():
 
     return dict(message="test sql2table", mytab=mytab)
 
+@action("myupload_file", method=["GET", "POST"])
+@action.uses(Template("myupload_file.html", delimiters="[[ ]]"), db, session, T)
+def myupload_file():
+
+    mytab = sql2table("test_table", db, caller="myupload_file", pg_dict=dict(request.query))
+
+    #return dict(message="test sql2table", mytab=mytab)
 
 @action("mytab_grid", method=["GET", "POST"])
 @action.uses(Template("mytab_grid.html", delimiters="[[ ]]"), db, session, T)
@@ -72,15 +85,18 @@ def mytab_grid():
         else:
             return SPAN(xx, _style="color:brown")
 
+    def title_func( xx, rr_id  ):
+        return xx
+
     fld_links = {
         1: lambda tx, xx, r_id: A(
             yfunc(xx, r_id),
-            _title="run some4_func",
+            _title= title_func( xx, r_id ), 
             _href=URL(f"some4_func", vars=dict(t_=tx, x_=xx, id_=r_id)),
         ),
         3: lambda tx, xx, r_id: A(
             zfunc(xx, r_id),
-            _title="run some4_func",
+            _title= title_func( xx, r_id ), 
             _href=URL(f"some4_func", vars=dict(t_=tx, x_=xx, id_=r_id)),
         ),
     }
@@ -93,6 +109,7 @@ def mytab_grid():
         links=links,
         hlinks=hlinks,
         fld_links=fld_links,
+        csv = False,
     )
 
     return dict(message="test sql2table_grid", mytab=mytab)

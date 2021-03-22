@@ -16,12 +16,14 @@ def sql2table(tbl, db, pg_dict={}, items_on_page=5, caller="index"):
     if items_on_page > table_items:
         items_on_page = table_items
 
+    max_pages, rem = divmod( table_items, items_on_page  )
+    if rem : max_pages += 1
+
     limitby = (pg - 1) * items_on_page, pg * items_on_page
     rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, limitby=limitby)
 
     headers = [db[tbl][f].label for f in db[tbl].fields]
 
-    max_pages = table_items // items_on_page
 
     return DIV(
         SPAN(f"{tbl}", _style="color:red"),
@@ -31,12 +33,12 @@ def sql2table(tbl, db, pg_dict={}, items_on_page=5, caller="index"):
                 "prev",
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg)),
-            ),
+            ) if pg > 1 else A( '!', _role = 'button',  _style="background-color:lightgray;color:black;" ),
             A(
                 "next",
                 _role="button",
-                _href=URL(caller, vars=dict(page=pg + 1 if pg <= max_pages else pg)),
-            ),
+                _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
+            ) if pg < max_pages else A( '!', _role = 'button', _style="background-color:lightgray;color:black;" ),
         ),
         TABLE(
             THEAD(TR(*[TD(H6(header)) for header in headers])),
@@ -69,10 +71,12 @@ def sql2table_grid(
     if items_on_page > table_items:
         items_on_page = table_items
 
+    max_pages, rem = divmod( table_items, items_on_page  )
+    if rem : max_pages += 1
+
     limitby = (pg - 1) * items_on_page, pg * items_on_page
     rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, limitby=limitby)
 
-    max_pages = table_items // items_on_page
 
     ij_start = -len(links)
     ff = [f for f in db[tbl].fields]
@@ -118,12 +122,12 @@ def sql2table_grid(
                 "prev",
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg)),
-            ),
+            ) if pg > 1 else A( '!', _role = 'button', _style="background-color:lightgray;color:black;" ) ,
             A(
                 "next",
                 _role="button",
-                _href=URL(caller, vars=dict(page=pg + 1 if pg <= max_pages else pg)),
-            ),
+                _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
+            ) if pg < max_pages else A( '!', _role = 'button', _style="background-color:lightgray;color:black;"  ) ,
         ),
         TABLE(
             THEAD(TR(*[TD(H6(h_func(hh[j], j))) for j in range(ij_start, len(hh))])),
@@ -132,3 +136,6 @@ def sql2table_grid(
             ),
         ),
     )
+
+# ----------------------------------------------------------------------
+
