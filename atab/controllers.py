@@ -82,6 +82,7 @@ def p4wupload_file():
             _title='save file to disk',
             _href=URL(f"p4wdownload_file", vars=dict(t_=tx, x_=xx, id_=r_id)),
         ),
+        'time': lambda tx, xx, r_id: xx.strftime("%d.%m.%Y %H:%M:%S"), 
     }
 
     mygrid = sql2table_grid( tbl, db, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
