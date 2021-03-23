@@ -1,64 +1,9 @@
 from yatl.helpers import A, I, SPAN, XML, DIV, P, TABLE, THEAD, TR, TD, TBODY, H6, IMG
+from py4web import action, request, response, abort, redirect, URL, Field
+from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
+from py4web.core import Template
 from py4web import URL
 import pydal
-
-
-def stop_button():
-    return A( '!', _title='stop',  _role = 'button', _style="background-color:lightgray;color:black;" )
-
-def sql2table(tbl, db, page_d={}, pagi= True, items_on_page=5, caller="index"):
-    # caller = 'sql2table'
-    if not tbl in db.tables:
-        return f"unknown tbl: {tbl}"
-
-    try:
-        pg = int(page_d.get("page", 1))
-    except ValueError:
-        pg = 1
-
-    table_items = len(db(db[tbl].id > 0).select())
-    if table_items == 0:
-           table_items = 1
-
-    if items_on_page > table_items:
-        items_on_page = table_items
-
-    max_pages, rem = divmod( table_items, items_on_page  )
-    if rem: 
-        max_pages += 1
-
-    limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
-    if not pagi:
-       items_on_page = table_items
-       limitby = ( 0, table_items )
-    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, limitby= limitby  )
-
-    headers = [db[tbl][f].label for f in db[tbl].fields]
-
-
-    return DIV(
-        SPAN("table_name: ", ),
-        SPAN(f"{tbl}", _style="color:red"),
-        SPAN(f"; {table_items} rows, {items_on_page} items_on_page"),
-        DIV(
-            A(
-                "prev",
-                _role="button",
-                _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg)),
-            ) if pg > 1 else stop_button(),
-            A(
-                "next",
-                _role="button",
-                _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
-            ) if pg < max_pages else stop_button(),
-        )
-        if pagi
-        else "",
-        TABLE(
-            THEAD(TR(*[TD(H6(header)) for header in headers])),
-            TBODY(*[TR(*[TD(row[field]) for field in rows.colnames]) for row in rows]),
-        ),
-    )
 
 
 def sql2table_grid(
@@ -74,6 +19,8 @@ def sql2table_grid(
     hlinks=[],
     fld_links={},
 ):
+    def stop_button():
+         return A( '!', _title='stop',  _role = 'button', _style="background-color:lightgray;color:black;" )
 
     if not tbl in db.tables:
         return f"unknown tbl: {tbl}"
@@ -170,5 +117,99 @@ def sql2table_grid(
         ),
     )
 
-# ----------------------------------------------------------------------
+@action("mytab_grid", method=["GET", "POST"])
+@action.uses(Template("mytab_grid.html", delimiters="[[ ]]"), db, session, T)
+def mytab_grid():
+    def xfunc(tt, rr_id):
+        return f"{tt}:{rr_id}-ok"
+
+    hlinks = ["+img", "+r_id", "+xfunc"]
+    links = [
+        lambda tx, r_id: A(
+            IMG(_width="30px", _height="30px", _src=URL("static/favicon.ico")),
+            _title="run some_func",
+            _href=URL(f"some_func", vars=dict(t_=tx, id_=r_id)),
+        ),
+        lambda tx, r_id: A(
+            f"myf2-id:[{r_id}]",
+            _title="run some3_func",
+            _href=URL(f"some3_func", vars=dict(t_=tx, id_=r_id)),
+        ),
+        lambda tx, r_id: A(
+            xfunc(tx, r_id),
+            _title="run some3_func",
+            _href=URL(f"some3_func", vars=dict(t_=tx, id_=r_id)),
+        ),
+    ]
+
+    def yfunc(xx, rr_id):
+        xx = xx[:10]
+        if rr_id % 2 == 0:
+            return SPAN(xx, _style="color:red")
+        else:
+            return SPAN(xx, _style="color:green")
+
+    def zfunc(xx, rr_id):
+        xx = xx[:10]
+        if rr_id % 2 == 0:
+            return SPAN(xx, _style="color:blue")
+        else:
+            return SPAN(xx, _style="color:brown")
+
+    def title_func( xx, rr_id  ):
+        return xx
+
+    fld_links = {
+        # by field num
+        1: lambda tx, xx, r_id: A(
+            yfunc(xx, r_id),
+            _title= title_func( xx, r_id ), 
+            _href=URL(f"some4_func", vars=dict(t_=tx, x_=xx, id_=r_id)),
+        ),
+        # by field name 
+        'f2': lambda tx, xx, r_id: A(
+            zfunc(xx, r_id),
+            _title= title_func( xx, r_id ), 
+            _href=URL(f"some4_func", vars=dict(t_=tx, x_=xx, id_=r_id)),
+        ),
+    }
+
+    mytab = sql2table_grid(
+        "test_table",
+        db,
+        page_d=dict(request.query),
+        caller="mytab_grid",
+        links=links,
+        hlinks=hlinks,
+        fld_links=fld_links,
+        csv = False,
+        pagi = True,
+    )
+
+    return dict(message="test sql2table_grid", mytab=mytab)
+
+
+@action("some_func", method=["GET", "POST"])
+def some_func():
+    args = repr(dict(request.query))
+    return f"some_func: {args}"
+
+
+@action("some2_func", method=["GET", "POST"])
+def some_func():
+    args = repr(dict(request.query))
+    return f"some2_func: {args}"
+
+
+@action("some3_func", method=["GET", "POST"])
+def some_func():
+    args = repr(dict(request.query))
+    return f"some3_func: {args}"
+
+
+@action("some4_func", method=["GET", "POST"])
+def some_func():
+    args = repr(dict(request.query))
+    return f"some4_func: {args}"
+
 
