@@ -19,7 +19,7 @@ from .common import (
 )
 
 from .atab_utils import sql2table, sql2table_grid
-from .upload_utils import get_unique_name, data2file, p4wdownload_file
+from .upload_utils import get_unique_name, data2file, p4wdownload_file, p4wdelete_file
 
 
 @unauthenticated("index", "index.html")
@@ -76,16 +76,34 @@ def p4wupload_file():
         messages.append( f"upload_form has errors: {upload_form.errors}")
 
 
-    fld_links = {
-        'id': lambda tx, xx, r_id: A(
-            f'save[{r_id}]',
+    hlinks = ["save", "del"]
+
+    links = [
+        lambda tx, r_id: A(
+            f"save:[{r_id}]",
             _title='save file to disk',
-            _href=URL(f"p4wdownload_file", vars=dict(t_=tx, x_=xx, id_=r_id)),
+            _href=URL(f"p4wdownload_file", vars=dict(t_=tx, id_=r_id)),
         ),
+
+        lambda tx, r_id: A(
+            f"del:[{r_id}]",
+            _title="run p4wdelete_file",
+            _href=URL(f"p4wdelete_file", vars=dict(t_=tx, id_=r_id)),
+        ),
+
+
+    ]
+
+    fld_links = {
+      #  'id': lambda tx, xx, r_id: A(
+      #      f'save[{r_id}]',
+      #      _title='save file to disk',
+      #      _href=URL(f"p4wdownload_file", vars=dict(t_=tx, x_=xx, id_=r_id)),
+      #  ),
         'time': lambda tx, xx, r_id: xx.strftime("%d.%m.%Y %H:%M:%S"), 
     }
 
-    mygrid = sql2table_grid( tbl, db, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
+    mygrid = sql2table_grid( tbl, db, links=links, hlinks=hlinks, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
     #mygrid = sql2table( tbl, db, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
     return dict( messages=messages,  upload_form=upload_form, mygrid=mygrid   ) 
 

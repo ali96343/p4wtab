@@ -58,3 +58,31 @@ def p4wdownload_file():
                            else 'attachment; filename=\"%s"' % ( r.orig_file_name)
     return file_content
 
+@action("p4wdelete_file", method=["GET", "POST"])
+@action.uses(session, db, auth, )
+#@action.uses(session, db, auth, "p4wdelete_file.html")
+def p4wdelete_file():
+    tbl = dict(request.query).get('t_', '')
+    if not tbl in db.tables:
+        return f"bad table: {tbl}"
+    id_ = dict(request.query).get('id_', 1)
+    try:
+        id = int(id_)
+    except:
+        return f"bad id: {id_}"
+    #return f"{tbl} {id}"
+
+    r = db[tbl](id)
+    if r is None:
+        return f"bad id: {id}"
+
+    file_path = os.path.join( UPLOAD_FOLDER , r.uniq_file_name )
+
+    if os.path.isfile( file_path  ):
+         os.remove( file_path  )
+
+    db(db[tbl].id == id  ).delete()
+    db.commit()
+    redirect(URL('p4wupload_file'))
+   
+

@@ -1,11 +1,12 @@
 from yatl.helpers import A, I, SPAN, XML, DIV, P, TABLE, THEAD, TR, TD, TBODY, H6, IMG
 from py4web import URL
+import pydal
 
 
 def stop_button():
     return A( '!', _title='stop',  _role = 'button', _style="background-color:lightgray;color:black;" )
 
-def sql2table(tbl, db, page_d={}, items_on_page=5, caller="index"):
+def sql2table(tbl, db, page_d={}, pagi= True, items_on_page=5, caller="index"):
     # caller = 'sql2table'
     if not tbl in db.tables:
         return f"unknown tbl: {tbl}"
@@ -26,8 +27,11 @@ def sql2table(tbl, db, page_d={}, items_on_page=5, caller="index"):
     if rem: 
         max_pages += 1
 
-    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, 
-              limitby= ( (pg - 1) * items_on_page, pg * items_on_page )  )
+    limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
+    if not pagi:
+       items_on_page = table_items
+       limitby = ( 0, table_items )
+    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, limitby= limitby  )
 
     headers = [db[tbl][f].label for f in db[tbl].fields]
 
@@ -47,7 +51,9 @@ def sql2table(tbl, db, page_d={}, items_on_page=5, caller="index"):
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
             ) if pg < max_pages else stop_button(),
-        ),
+        )
+        if pagi
+        else "",
         TABLE(
             THEAD(TR(*[TD(H6(header)) for header in headers])),
             TBODY(*[TR(*[TD(row[field]) for field in rows.colnames]) for row in rows]),
@@ -58,10 +64,12 @@ def sql2table(tbl, db, page_d={}, items_on_page=5, caller="index"):
 def sql2table_grid(
     tbl,
     db,
+    tbl_query = None,
     page_d={},
     items_on_page=13,
     caller="index",
     csv=False,
+    pagi=False,
     links=[],
     hlinks=[],
     fld_links={},
@@ -70,23 +78,33 @@ def sql2table_grid(
     if not tbl in db.tables:
         return f"unknown tbl: {tbl}"
 
+    if tbl_query is None:
+       tbl_query = db[tbl].id > 0
+    if tbl_query  and not isinstance( tbl_query, pydal.objects.Query  ):
+        return f"bad tbl_query! tbl: {tbl}"
+
     try:
         pg = int(page_d.get("page", 1))
     except ValueError:
         pg = 1
 
-    table_items = len(db(db[tbl].id > 0).select())
+    table_items = len(db( tbl_query  ).select())
     if table_items == 0:
            table_items = 1
     if items_on_page > table_items:
         items_on_page = table_items
 
+
     max_pages, rem = divmod( table_items, items_on_page  )
     if rem: 
         max_pages += 1
 
-    rows = db(db[tbl].id > 0).select(orderby=db[tbl].id, 
-              limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) )
+    limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
+    if not pagi:
+       items_on_page = table_items
+       limitby = ( 0, table_items )
+
+    rows = db( tbl_query  ).select(orderby= db[tbl].id, limitby= limitby   )
 
     ij_start = -len(links)
     ff = [f for f in db[tbl].fields]
@@ -141,7 +159,9 @@ def sql2table_grid(
                 _role="button",
                 _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
             ) if pg < max_pages else stop_button(),
-        ),
+        )
+        if pagi
+        else "",
         TABLE(
             THEAD(TR(*[TD(H6(h_func(hh[j], j))) for j in range(ij_start, len(hh))])),
             TBODY( *[ TR( *[ TD(r_func(row[ff[i]], i, row, tbl, ff[i])) for i in range(ij_start, len(ff)) ])
