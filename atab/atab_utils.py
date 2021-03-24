@@ -11,7 +11,6 @@ def sql2table(
     db,
     tbl_query = None,
     order_by = None,
-    page_d={},
     items_on_page=13,
     caller="index",
     csv=False,
@@ -19,9 +18,13 @@ def sql2table(
     links=[],
     hlinks=[],
     fld_links={},
+    fld_skip=[0,],
+    page_d={},
+    show_thead= True,
 ):
     def stop_button():
          return A( '!', _title='stop',  _role = 'button', _style="background-color:lightgray;color:black;" )
+
 
     if not tbl in db.tables:
         return f"unknown tbl: {tbl}"
@@ -45,10 +48,12 @@ def sql2table(
     if items_on_page > table_items:
         items_on_page = table_items
 
+    if table_items == 0:
+        show_thead = False
+
     max_pages, rem = divmod( table_items, items_on_page  ) if table_items else (0,0)
     if rem: 
         max_pages += 1
-
 
     limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
     if not pagi:
@@ -66,13 +71,17 @@ def sql2table(
             if len(hlinks) >= -jj:
                 return hlinks[len(hlinks) + jj]
             return "act"
+        if jj in fld_skip:
+            return ''
         return f"{x}"
 
     def r_func(x, ii, r, t, f_nm):
         if ii < 0:
             if len(links) >= -ii:
                 return links[len(links) + ii](t, r.id)
-            return "unk"
+            return "act"
+        if ii in fld_skip:
+            return ''
         if ii in fld_links:
             return fld_links[ii](t, x, r.id)
         if f_nm in fld_links:
@@ -114,7 +123,7 @@ def sql2table(
         if pagi
         else "",
         TABLE(
-            THEAD(TR(*[TD(H6(h_func(hh[j], j))) for j in range(ij_start, len(hh))])),
+            THEAD(TR(*[TD(H6(h_func(hh[j], j))) for j in range(ij_start, len(hh))])) if show_thead else "",
             TBODY( *[ TR( *[ TD(r_func(row[ff[i]], i, row, tbl, ff[i])) for i in range(ij_start, len(ff)) ])
                     for row in rows ]
             ),
@@ -125,7 +134,7 @@ def sql2table(
 @action.uses(Template("mytab_grid.html", delimiters="[[ ]]"), db, session, T)
 def mytab_grid():
     def xfunc(tt, rr_id):
-        return f"{tt}:{rr_id}-ok"
+        return f"{tt}:id={rr_id}"
 
     hlinks = ["+img", "+r_id", "+xfunc"]
     links = [

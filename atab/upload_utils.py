@@ -108,7 +108,7 @@ def p4wupload_file():
     upload_form = Form(
         [
             Field( upload_field, 'upload', requires=IS_NOT_EMPTY(),),
-            Field("remark", default='some comment' ),
+            Field("remark", default='mycomment' ),
         ],
         formstyle=FormStyleDefault,
     )
@@ -153,7 +153,7 @@ def p4wupload_file():
       #      _title='save file to disk',
       #      _href=URL(f"p4wdownload_file", vars=dict(t_=tx, x_=xx, id_=r_id)),
       #  ),
-        'time': lambda tx, xx, r_id: xx.strftime("%d.%m.%Y %H:%M:%S"), 
+        'time': lambda tx, xx, r_id: SPAN( xx.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red" ), 
     }
 
     mygrid = sql2table( tbl, db, links=links, hlinks=hlinks, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
