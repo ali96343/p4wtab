@@ -6,10 +6,11 @@ from py4web import URL
 import pydal
 
 
-def sql2table_grid(
+def sql2table(
     tbl,
     db,
     tbl_query = None,
+    order_by = None,
     page_d={},
     items_on_page=13,
     caller="index",
@@ -27,31 +28,34 @@ def sql2table_grid(
 
     if tbl_query is None:
        tbl_query = db[tbl].id > 0
+
     if tbl_query  and not isinstance( tbl_query, pydal.objects.Query  ):
         return f"bad tbl_query! tbl: {tbl}"
+
+    if order_by is None:
+       order_by = ~db[tbl].id
 
     try:
         pg = int(page_d.get("page", 1))
     except ValueError:
         pg = 1
 
-    table_items = len(db( tbl_query  ).select())
-    if table_items == 0:
-           table_items = 1
+
+    table_items = len(db( tbl_query ).select())
     if items_on_page > table_items:
         items_on_page = table_items
 
-
-    max_pages, rem = divmod( table_items, items_on_page  )
+    max_pages, rem = divmod( table_items, items_on_page  ) if table_items else (0,0)
     if rem: 
         max_pages += 1
+
 
     limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
     if not pagi:
        items_on_page = table_items
        limitby = ( 0, table_items )
 
-    rows = db( tbl_query  ).select(orderby= db[tbl].id, limitby= limitby   )
+    rows = db( tbl_query  ).select(orderby= order_by, limitby= limitby   )
 
     ij_start = -len(links)
     ff = [f for f in db[tbl].fields]
@@ -174,7 +178,7 @@ def mytab_grid():
         ),
     }
 
-    mytab = sql2table_grid(
+    mytab = sql2table(
         "test_table",
         db,
         page_d=dict(request.query),
@@ -186,7 +190,7 @@ def mytab_grid():
         pagi = True,
     )
 
-    return dict(message="test sql2table_grid", mytab=mytab)
+    return dict(message="test sql2table", mytab=mytab)
 
 
 @action("some_func", method=["GET", "POST"])

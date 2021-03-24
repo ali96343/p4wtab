@@ -6,7 +6,7 @@ from .settings import APP_NAME, UPLOAD_FOLDER
 from pydal.validators import IS_NOT_EMPTY, IS_INT_IN_RANGE, IS_IN_SET, IS_IN_DB
 from yatl.helpers import A, I, SPAN, XML, DIV, P, TABLE, THEAD, TR, TD, TBODY, H6, IMG
 
-from .atab_utils import sql2table_grid
+from .atab_utils import sql2table
 
 
 def get_unique_name(orig_name='', default_len=10):
@@ -145,7 +145,6 @@ def p4wupload_file():
             _href=URL(f"p4wdelete_file", vars=dict(t_=tx, id_=r_id)),
         ),
 
-
     ]
 
     fld_links = {
@@ -157,8 +156,7 @@ def p4wupload_file():
         'time': lambda tx, xx, r_id: xx.strftime("%d.%m.%Y %H:%M:%S"), 
     }
 
-    mygrid = sql2table_grid( tbl, db, links=links, hlinks=hlinks, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
-    #mygrid = sql2table( tbl, db, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
+    mygrid = sql2table( tbl, db, links=links, hlinks=hlinks, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
     return dict( messages=messages,  upload_form=upload_form, mygrid=mygrid   ) 
 
 #---------------------------------------------------------------------------------------------------------

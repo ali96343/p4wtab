@@ -28,7 +28,7 @@ def index():
     message = T("Hello {first_name}".format(**user) if user else "Hello")
     menu = DIV(
                P( "test-demo for sql2table ( SQLTABLE from web2py)"),
-               A( "sqltable_grid", _role="button", _href=URL('mytab_grid', ),) ,
+               A( "sql2table", _role="button", _href=URL('mytab_grid', ),) ,
                A( "p4wupload_file", _role="button", _href=URL('p4wupload_file', ),) ,
               )
     return dict(message=message, menu=menu)
