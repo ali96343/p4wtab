@@ -19,6 +19,7 @@ def sql2table(
     hlinks=[],
     fld_links={},
     fld_skip=[0,],
+    fld_length = 15,
     page_d={},
     show_thead= True,
 ):
@@ -73,6 +74,10 @@ def sql2table(
             return "act"
         if jj in fld_skip:
             return ''
+
+        if not x is None and isinstance(x, str) and len(x) > fld_length :
+             x=x[:fld_length] + '...'
+
         return f"{x}"
 
     def r_func(x, ii, r, t, f_nm):
@@ -86,6 +91,10 @@ def sql2table(
             return fld_links[ii](t, x, r.id)
         if f_nm in fld_links:
             return fld_links[f_nm](t, x, r.id)
+
+        if not x is None and isinstance(x, str) and len(x) > fld_length :
+             x=x[:fld_length] + '...'
+            
         return f"{x}"
 
     return DIV(

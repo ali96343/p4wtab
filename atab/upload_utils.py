@@ -61,6 +61,8 @@ def p4wdownload_file():
                            else 'attachment; filename=\"%s"' % ( r.orig_file_name)
     return file_content
 
+
+
 @action("p4wdelete_file", method=["GET", "POST"])
 @action.uses(session, db, auth, )
 #@action.uses(session, db, auth, "p4wdelete_file.html")
@@ -68,7 +70,7 @@ def p4wdelete_file():
     tbl = dict(request.query).get('t_', '')
     if not tbl in db.tables:
         return f"bad table: {tbl}"
-    id_ = dict(request.query).get('id_', 1)
+    id_ = dict(request.query).get('id_', 0)
     try:
         id = int(id_)
     except:
@@ -86,7 +88,7 @@ def p4wdelete_file():
 
     db(db[tbl].id == id  ).delete()
     db.commit()
-    redirect(URL('p4wupload_file'))
+    redirect(URL('p4wupload_file', vars=dict(t_=tbl, id_=id)  ))
    
 
 #---------------------------------------------------------------------------------------------------------
@@ -95,9 +97,15 @@ from py4web.utils.form import Form, FormStyleBulma, FormStyleDefault
 from .settings import APP_NAME, UPLOAD_FOLDER
 from pydal.validators import IS_NOT_EMPTY, IS_INT_IN_RANGE, IS_IN_SET, IS_IN_DB
 
+from .common import flash
+
 @action("p4wupload_file", method=["GET", "POST"])
-@action.uses("p4wupload_file.html", session, db, T)
+@action.uses(flash,  session, db, T, "p4wupload_file.html")
 def p4wupload_file():
+
+    t_id = dict(request.query).get('id_', '0')
+    if t_id != '0': 
+        flash.set(f"deleted id={t_id}", class_='info', sanitize=True)
 
     if not os.path.isdir(UPLOAD_FOLDER):
          return f"bad upload path: {UPLOAD_FOLDER}"

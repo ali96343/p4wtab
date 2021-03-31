@@ -1,4 +1,3 @@
-# p4wtab  
 
 py4web app demo for sql2table
 
