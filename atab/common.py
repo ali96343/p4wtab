@@ -189,3 +189,7 @@ auth.enable(uses=(session, T, db), env=dict(T=T))
 # #######################################################
 unauthenticated = ActionFactory(db, session, T, flash, auth)
 authenticated = ActionFactory(db, session, T, flash, auth.user)
+
+from py4web.utils.url_signer import URLSigner
+
+url_signer = URLSigner(session)

@@ -41,7 +41,7 @@ def sql2table(
 
     try:
         pg = int(page_d.get("page", 1))
-    except ValueError:
+    except ( ValueError, TypeError) : 
         pg = 1
 
 
@@ -101,36 +101,42 @@ def sql2table(
         SPAN("table_name: ", ),
         SPAN(f"{tbl}", _style="color:red"),
         SPAN(f"; {table_items} rows, {items_on_page} items_on_page"),
-        DIV(
-            A(
-                "csv",
-                _role="button",
-                _title="table to csv file",
-                _href=URL("some_func", vars=dict(t_=tbl, c="a")),
-            ),
-            A(
-                "xls",
-                _role="button",
-                _title="table to xls file",
-                _href=URL("some_func", vars=dict(t_=tbl, c="b")),
-            ),
-        )
-        if csv
-        else "",
-        DIV(
-            A(
-                "prev",
-                _role="button",
-                _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg)),
-            ) if pg > 1 else stop_button() ,
-            A(
-                "next",
-                _role="button",
-                _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg)),
-            ) if pg < max_pages else stop_button(),
-        )
-        if pagi
-        else "",
+        DIV( # <div>
+
+            SPAN(
+                A(
+                    "prev",
+                    _role="button",
+                    _href=URL(caller, vars=dict(page=pg - 1 if pg > 1 else pg),  ),
+                ) if pg > 1 else stop_button() ,
+                A(
+                    "next",
+                    _role="button",
+                    _href=URL(caller, vars=dict(page=pg + 1 if pg < max_pages else pg), ),
+                ) if pg < max_pages else stop_button(),
+
+            )
+            if pagi
+            else "",
+
+            SPAN(
+                A(
+                    "csv",
+                    _role="button",
+                    _title="table to csv file",
+                    _href=URL("some_func", vars=dict(t_=tbl, c="a"),),
+                ),
+                A(
+                    "xls",
+                    _role="button",
+                    _title="table to xls file",
+                    _href=URL("some_func", vars=dict(t_=tbl, c="b"), ),
+                ),
+            )
+            if csv
+            else "",
+        ),  # </div>
+
         TABLE(
             THEAD(TR(*[TD(H6(h_func(hh[j], j))) for j in range(ij_start, len(hh))])) if show_thead else "",
             TBODY( *[ TR( *[ TD(r_func(row[ff[i]], i, row, tbl, ff[i])) for i in range(ij_start, len(ff)) ])
@@ -204,7 +210,7 @@ def mytab_grid():
         links=links,
         hlinks=hlinks,
         fld_links=fld_links,
-        csv = False,
+        csv = True,
         pagi = True,
     )
 

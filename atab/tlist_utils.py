@@ -9,22 +9,27 @@ import pydal
 
 from .atab_utils import sql2table
 
-from .common import flash
+from .common import flash, url_signer
+
 
 @action("tlist", method=["GET", "POST"])
 @action.uses(flash, db, session, T, Template("tlist.html", delimiters="[[ ]]"),)
 def tlist():
     ts=[ e for e in db.tables  ]
-    headers= ['tname', 'cmd1', 'cmd2', 'cmd3']
+    headers= ['tname', 'tlen','cmd1', 'cmd2', 'cmd3']
 
     #flash.set("Hello World", sanitize=True)
 
     #cmd = ['111', '222', '333']
+    def show_len(tn):
+        c = db(db[tn].id>0).count()
+        return f'{c}' if c else ''
 
     cmd = [ 
-            lambda tn : A( "table",  _role="button",  _href=URL( f"p4w_sql_table/{tn}",   ), ) ,
-            lambda tn : A( "form",   _role="button",  _href=URL( f"p4w_create_form/{tn}", ), ) , 
-            lambda tn : A( "grid",   _role="button",  _href=URL( f"p4w_grid/{tn}",        ), ) ,
+            lambda tn : show_len(tn) ,
+            lambda tn : A( "table",  _role="button",  _href=URL( f"p4w_sql_table/{tn}", signer=url_signer  ), ) ,
+            lambda tn : A( "form",   _role="button",  _href=URL( f"p4w_create_form/{tn}",signer=url_signer ), ) , 
+            lambda tn : A( "grid",   _role="button",  _href=URL( f"p4w_grid/{tn}",   signer=url_signer  ), ) ,
           ]
 
     #w, h = len(cmd), len(ts);

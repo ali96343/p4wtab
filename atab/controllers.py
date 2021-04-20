@@ -22,6 +22,12 @@ from .atab_utils import mytab_grid
 from .upload_utils import p4wupload_file
 from .tlist_utils import tlist 
 
+from yatl.helpers import A
+from . common import db, session, T, cache, auth , url_signer 
+
+
+
+
 
 @unauthenticated("index", "index.html")
 def index():
@@ -29,8 +35,13 @@ def index():
     message = T("Hello {first_name}".format(**user) if user else "Hello")
     menu = DIV(
                P( "test-demo for sql2table ( SQLTABLE from web2py)"),
-               A( "sql2table", _role="button", _href=URL('mytab_grid', ),) ,
-               A( "p4wupload_file", _role="button", _href=URL('p4wupload_file', ),) ,
-               A( "tlist", _role="button", _href=URL('tlist', ),) ,
+               A( "sql2table", _role="button", _href=URL('mytab_grid', signer=url_signer   ),) ,
+               A( "p4wupload_file", _role="button", _href=URL('p4wupload_file', signer=url_signer ),) ,
+               A( "tlist", _role="button", _href=URL('tlist', signer=url_signer ),) ,
               )
     return dict(message=message, menu=menu)
+
+#from yatl.helpers import UL, LI
+#def MENU(items):
+#      return UL(*[LI(name,, _href=link) if not other else LI(MENU(other)) for name, link, other in items])
+
