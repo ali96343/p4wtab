@@ -105,7 +105,7 @@ def p4wupload_file():
 
     t_id = dict(request.query).get('id_', '0')
     if t_id != '0': 
-        flash.set(f"deleted id={t_id}", class_='info', sanitize=True)
+        flash.set(f"deleted id={t_id}", sanitize=True)
 
     if not os.path.isdir(UPLOAD_FOLDER):
          return f"bad upload path: {UPLOAD_FOLDER}"
