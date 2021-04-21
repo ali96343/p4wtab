@@ -1,4 +1,4 @@
-- http://py4web.com 
+- install http://py4web.com 
 - py4web is an excellent and fast framework ( with tornado event loop) for web development
 - py4web test myapp for sql2table 
 
