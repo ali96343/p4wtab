@@ -138,7 +138,11 @@ def p4w_grid(path=None,):
                 #print (  f"{tbl}.{e}"  )
                 xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red"  ) 
            else:  
-                xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN(e[:15] + "...") 
+                if e and len(e) > 15:
+                    xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN(e[:15] + "...") 
+                else:
+                    xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN(e) 
+                
            
         return xfmt
 
