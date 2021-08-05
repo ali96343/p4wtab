@@ -10,3 +10,16 @@
 [[=upload_form ]]
 [[=mygrid]]
 
+<script>
+!function () {
+    const aTags = document.getElementsByTagName("LABEL");
+
+    for (let i = 0; i < aTags.length; i++) {
+        if (aTags[i].innerHTML.startsWith('Change') ) {
+            aTags[i].innerHTML = 'Select file for upload: ';
+            break;
+        }
+    }
+}();
+
+</script>

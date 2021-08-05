@@ -120,7 +120,7 @@ def p4wupload_file():
     upload_field = 'image'
     upload_form = Form(
         [
-            Field( upload_field, 'upload', requires=IS_NOT_EMPTY(),),
+            Field( upload_field, 'upload', label='',  requires=IS_NOT_EMPTY(),),
             Field("remark", default='mycomment' ),
         ],
         formstyle=FormStyleDefault,
@@ -169,7 +169,7 @@ def p4wupload_file():
         'time': lambda tx, xx, r_id: SPAN( xx.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red" ), 
     }
 
-    mygrid = sql2table( tbl, db, links=links, hlinks=hlinks, fld_links=fld_links, items_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
+    mygrid = sql2table( tbl, db, links=links, hlinks=hlinks, fld_links=fld_links, rows_on_page = 2, caller="p4wupload_file", page_d=dict(request.query))
     return dict( messages=messages,  upload_form=upload_form, mygrid=mygrid   ) 
 
 #---------------------------------------------------------------------------------------------------------

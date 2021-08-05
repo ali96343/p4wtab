@@ -134,12 +134,13 @@ def p4w_grid(path=None,):
     def re_fmt(tbl, cut_line = 10):
         xfmt= dict()
         for e in db[tbl].fields:
-           if db[tbl][e].type == 'datetime':
-              xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red"  ) 
-           elif any( [db[tbl][e].type == 'string', db[tbl][e].type == 'text'] ):
-               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e[:cut_line] + "..." )
+           tmp_type = db[tbl][e].type
+           if tmp_type == 'datetieme':
+              xfmt[ f"{tbl}.{e}"] = lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red") 
+           elif any( [tmp_type == 'string', tmp_type == 'text'] ):
+               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e[:cut_line] + "~" )
            else:
-               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e )
+               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e, _style="color:green" )
            
         return xfmt
 

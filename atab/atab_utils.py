@@ -11,7 +11,7 @@ def sql2table(
     db,
     tbl_query = None,
     order_by = None,
-    items_on_page=13,
+    rows_on_page=13,
     caller="index",
     csv=False,
     pagi=False,
@@ -46,19 +46,19 @@ def sql2table(
 
 
     table_items = len(db( tbl_query ).select())
-    if items_on_page > table_items:
-        items_on_page = table_items
+    if rows_on_page > table_items:
+        rows_on_page = table_items
 
     if table_items == 0:
         show_thead = False
 
-    max_pages, rem = divmod( table_items, items_on_page  ) if table_items else (0,0)
+    max_pages, rem = divmod( table_items, rows_on_page  ) if table_items else (0,0)
     if rem: 
         max_pages += 1
 
-    limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
+    limitby= ( (pg - 1) * rows_on_page, pg * rows_on_page ) 
     if not pagi:
-       items_on_page = table_items
+       rows_on_page = table_items
        limitby = ( 0, table_items )
 
     rows = db( tbl_query  ).select(orderby= order_by, limitby= limitby   )
@@ -93,14 +93,14 @@ def sql2table(
             return fld_links[f_nm](t, x, r.id)
 
         if not x is None and isinstance(x, str) and len(x) > fld_length :
-             x=x[:fld_length] + '...'
+             x=x[:fld_length] + '~'
             
         return f"{x}"
 
     return DIV(
         SPAN("table_name: ", ),
         SPAN(f"{tbl}", _style="color:red"),
-        SPAN(f"; {table_items} rows, {items_on_page} items_on_page"),
+        SPAN(f"; {table_items} rows, {rows_on_page} rows_on_page, {pg} page "),
         DIV( # <div>
 
             SPAN(
@@ -250,7 +250,7 @@ class Sqltable(object):
         db,
         tbl_query = None,
         order_by = None,
-        items_on_page=13,
+        rows_on_page=13,
         caller="index",
         csv=False,
         pagi=False,
@@ -266,7 +266,7 @@ class Sqltable(object):
         self.db = db,
         self.tbl_query = tbl_query
         self.order_by = order_by
-        self.items_on_page =items_on_page
+        self.rows_on_page =rows_on_page
         self.caller= caller
         self.csv=csv
         self.pagi=pagi
@@ -283,7 +283,7 @@ class Sqltable(object):
         db,
         tbl_query = None,
         order_by = None,
-        items_on_page=13,
+        rows_on_page=13,
         caller="index",
         csv=False,
         pagi=False,
@@ -318,19 +318,19 @@ class Sqltable(object):
     
     
         table_items = len(db( tbl_query ).select())
-        if items_on_page > table_items:
-            items_on_page = table_items
+        if rows_on_page > table_items:
+            rows_on_page = table_items
     
         if table_items == 0:
             show_thead = False
     
-        max_pages, rem = divmod( table_items, items_on_page  ) if table_items else (0,0)
+        max_pages, rem = divmod( table_items, rows_on_page  ) if table_items else (0,0)
         if rem: 
             max_pages += 1
     
-        limitby= ( (pg - 1) * items_on_page, pg * items_on_page ) 
+        limitby= ( (pg - 1) * rows_on_page, pg * rows_on_page ) 
         if not pagi:
-           items_on_page = table_items
+           rows_on_page = table_items
            limitby = ( 0, table_items )
     
         rows = db( tbl_query  ).select(orderby= order_by, limitby= limitby   )
@@ -372,7 +372,7 @@ class Sqltable(object):
         return DIV(
             SPAN("table_name: ", ),
             SPAN(f"{tbl}", _style="color:red"),
-            SPAN(f"; {table_items} rows, {items_on_page} items_on_page"),
+            SPAN(f"; {table_items} rows, {rows_on_page} rows_on_page"),
             DIV( # <div>
     
                 SPAN(
