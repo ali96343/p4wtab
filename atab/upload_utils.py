@@ -30,6 +30,7 @@ def p4wdownload_file():
     try:
         id = int(id_)
     except ( ValueError, TypeError) :
+        return f"bad id: {id_}"
         id = 1
 
     import mimetypes
@@ -50,6 +51,10 @@ def p4wdownload_file():
 
     ext = os.path.splitext( r.orig_file_name  )
     tru_ext = ext[1].lower() if len(ext) and len(ext[1]) else ''
+
+    # HACK !!! view inline
+    if tru_ext.endswith(('.py','.html', '.css', '.js', '.json', '.ts','.map','.min','.un')):
+         tru_ext = '.txt'
 
     file_type = mimetypes.types_map.get(tru_ext, None)
     view_in_browser =('.pdf','.jpeg','.txt','.jpg','.jpe','.png','.gif','.tif','.tiff','.bmp','.svg','.ico')
@@ -127,9 +132,9 @@ def p4wupload_file():
              image_file = bottle_class.raw_filename
              image_content = bottle_class.file.read()
              uniq_file_name = get_unique_name( )
-             fnm2 = os.path.join( UPLOAD_FOLDER , uniq_file_name )
-             with open(fnm2, 'wb') as f:
-                  f.write( image_content )
+             #with open( os.path.join( UPLOAD_FOLDER , uniq_file_name )   , 'wb') as f:
+             #     f.write( image_content )
+             data2file( image_content, os.path.join( UPLOAD_FOLDER , uniq_file_name )  )
              row = dict( orig_file_name = image_file, uniq_file_name=uniq_file_name, remark=upload_form.vars['remark']  )
              if db[tbl].insert(**db[tbl]._filter_fields(row)):
                    db.commit()

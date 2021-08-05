@@ -131,22 +131,19 @@ def p4w_grid(path=None,):
   
     import datetime
  
-    def re_fmt(tbl):
+    def re_fmt(tbl, cut_line = 10):
         xfmt= dict()
         for e in db[tbl].fields:
-           if  db[tbl][e].type == 'datetime':
-                #print (  f"{tbl}.{e}"  )
-                xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red"  ) 
-           else:  
-                if e and len(e) > 15:
-                    xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN(e[:15] + "...") 
-                else:
-                    xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN(e) 
-                
+           if db[tbl][e].type == 'datetime':
+              xfmt[ f"{tbl}.{e}"] =  lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red"  ) 
+           elif any( [db[tbl][e].type == 'string', db[tbl][e].type == 'text'] ):
+               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e[:cut_line] + "..." )
+           else:
+               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e )
            
         return xfmt
 
-    #fmt = {f"{tbl}.{e}": lambda e: SPAN(e[:20] + "...") for e in db[tbl].fields}
+    #fmt = {f"{tbl}.{e}": lambda e: SPAN(e[:10] + "...") for e in db[tbl].fields }
     fmt = re_fmt( tbl )
     for k, v in fmt.items():
         grid.formatters[k] = v
