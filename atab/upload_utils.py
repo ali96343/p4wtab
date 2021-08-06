@@ -67,9 +67,9 @@ def p4wdownload_file():
     )
 
     response.headers["Content-disposition"] = (
-        'inline; filename="%s"' % (r.orig_file_name)
+        f'inline; filename="{r.orig_file_name}"' 
         if not file_type is None and tru_ext.endswith(view_in_browser)
-        else 'attachment; filename="%s"' % (r.orig_file_name)
+        else f'attachment; filename="{r.orig_file_name}"'
     )
     return file_content
 
