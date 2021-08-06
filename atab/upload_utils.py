@@ -23,9 +23,6 @@ def p4wdownload_file():
         return f"bad id: {id_}"
         # id = 1
 
-    import mimetypes
-
-    mimetypes.init()
 
     r = db[tbl](id)
     if r is None:
@@ -38,11 +35,17 @@ def p4wdownload_file():
     ext = os.path.splitext(r.orig_file_name)
     tru_ext = ext[1].lower() if len(ext) and len(ext[1]) else ""
 
-    # HACK !!! view inline
+    # view prog-files ionline as text
     if tru_ext.endswith(
         (".py", ".html", ".css", ".scss", ".js", ".json", ".ts", ".tsx", ".vue", ".un")
     ):
         tru_ext = ".txt"
+
+    # --------------------- check mime -----------------------
+
+    import mimetypes
+
+    mimetypes.init()
 
     file_type = mimetypes.types_map.get(tru_ext, None)
     view_in_browser = (
