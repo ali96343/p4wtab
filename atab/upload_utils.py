@@ -8,7 +8,8 @@ from yatl.helpers import A, I, SPAN, XML, DIV, P, TABLE, THEAD, TR, TD, TBODY, H
 
 from .atab_utils import sql2table
 
-from .helpers import get_unique_name, data2file, file2data, DATE_FORMAT
+from .helpers import get_unique_name, data2file, file2data, make_headers, DATE_FORMAT
+
 
 @action("p4wdownload_file", method=["GET", "POST"])
 @action.uses(session, db, auth, "p4wdownload_file.html")
@@ -21,8 +22,6 @@ def p4wdownload_file():
         id = int(id_)
     except (ValueError, TypeError):
         return f"bad id: {id_}"
-        # id = 1
-
 
     r = db[tbl](id)
     if r is None:
@@ -31,47 +30,10 @@ def p4wdownload_file():
     if not os.path.isdir(UPLOAD_FOLDER):
         return f"bad upload path: {UPLOAD_FOLDER}"
 
-
-    ext = os.path.splitext(r.orig_file_name)
-    tru_ext = ext[1].lower() if len(ext) and len(ext[1]) else ""
-
-    # view prog-files ionline as text
-    if tru_ext.endswith(
-        (".py", ".html", ".css", ".scss", ".js", ".json", ".ts", ".tsx", ".vue", ".un")
-    ):
-        tru_ext = ".txt"
-
-    # --------------------- check mime -----------------------
-
-    import mimetypes
-
-    mimetypes.init()
-
-    file_type = mimetypes.types_map.get(tru_ext, None)
-    view_in_browser = (
-        ".pdf",
-        ".jpeg",
-        ".txt",
-        ".jpg",
-        ".jpe",
-        ".png",
-        ".gif",
-        ".tif",
-        ".tiff",
-        ".bmp",
-        ".svg",
-        ".ico",
-    )
-
-    response.headers["Content-Type"] = (
-        "application/octet-stream" if file_type is None else file_type
-    )
-
-    response.headers["Content-disposition"] = (
-        f'inline; filename="{r.orig_file_name}"' 
-        if not file_type is None and tru_ext.endswith(view_in_browser)
-        else f'attachment; filename="{r.orig_file_name}"'
-    )
+    (
+        response.headers["Content-Type"],
+        response.headers["Content-disposition"],
+    ) = make_headers(r.orig_file_name)
 
     return file2data(os.path.join(UPLOAD_FOLDER, r.uniq_file_name))
 
@@ -180,9 +142,7 @@ def p4wupload_file():
         #      _title='save file to disk',
         #      _href=URL(f"p4wdownload_file", vars=dict(t_=tx, x_=xx, id_=r_id)),
         #  ),
-        "time": lambda tx, xx, r_id: SPAN(
-            xx.strftime(DATE_FORMAT), _style="color:red"
-        ),
+        "time": lambda tx, xx, r_id: SPAN(xx.strftime(DATE_FORMAT), _style="color:red"),
     }
 
     mygrid = sql2table(
