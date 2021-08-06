@@ -4,10 +4,6 @@ from py4web.utils.populate import populate
 from yatl.helpers import SPAN, H6
 import datetime
 
-#
-# py4web app, AI-biorex ported 07.01.2021 03:54:13 UTC+3, src: https://github.com/tailwindadmin/admin
-
-#
 
 #import pydal
 
