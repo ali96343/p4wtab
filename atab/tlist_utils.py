@@ -138,7 +138,7 @@ def p4w_grid(path=None,):
            if tmp_type == 'datetieme':
               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red") 
            elif any( [tmp_type == 'string', tmp_type == 'text'] ):
-               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e[:cut_line] + "~" )
+               xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e[:cut_line] + "~" if len(e) > cut_line else e )
            else:
                xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e, _style="color:green" )
            
