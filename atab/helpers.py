@@ -42,7 +42,7 @@ def data2file(data, fnm, mode="wb"):
 def file2data(fnm, mode="rb"):
     data = ""
     try:
-        with open(fnm, "rb") as f:
+        with open(fnm, mode) as f:
             data = f.read()
     except IOError:
         print("file2data: IOError")
@@ -52,6 +52,7 @@ def file2data(fnm, mode="rb"):
 
 def make_headers(orig_fnm):
 
+    
     ext = os.path.splitext(orig_fnm)
     tru_ext = ext[1].lower() if len(ext[1]) else ""
 
@@ -93,7 +94,7 @@ def make_headers(orig_fnm):
 
     Content_disposition = (
         f'inline; filename="{orig_fnm}"'
-        if not file_type is None and tru_ext.endswith(view_in_browser)
+        if not file_type is None and ( tru_ext in view_in_browser )
         else f'attachment; filename="{orig_fnm}"'
     )
     return Content_Type, Content_disposition
