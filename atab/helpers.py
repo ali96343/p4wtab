@@ -3,7 +3,7 @@ import sys, os, json, uuid, datetime
 import sys
 
 
-DATE_FORMAT =  "%d.%m.%Y %H:%M:%S"
+DATE_FORMAT =  "%d.%m.%y %H:%M:%S"
 
 def check_py_version():
     req_version = (3,9)

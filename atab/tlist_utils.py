@@ -11,6 +11,8 @@ from .atab_utils import sql2table
 
 from .common import flash, url_signer
 
+from .helpers import DATE_FORMAT
+
 
 @action("tlist", method=["GET", "POST"])
 @action.uses(flash, db, session, T, Template("tlist.html", delimiters="[[ ]]"),)
@@ -135,8 +137,8 @@ def p4w_grid(path=None,):
         xfmt= dict()
         for e in db[tbl].fields:
            tmp_type = db[tbl][e].type
-           if tmp_type == 'datetieme':
-              xfmt[ f"{tbl}.{e}"] = lambda e: SPAN( e.strftime("%d.%m.%Y %H:%M:%S"), _style="color:red") 
+           if tmp_type == 'datetime':
+              xfmt[ f"{tbl}.{e}"] = lambda e: SPAN( e.strftime(DATE_FORMAT), _style="color:red") 
            elif any( [tmp_type == 'string', tmp_type == 'text'] ):
                xfmt[ f"{tbl}.{e}"] = lambda e: SPAN(e[:cut_line] + "~" if len(e) > cut_line else e )
            else:
