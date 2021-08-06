@@ -34,8 +34,6 @@ def p4wdownload_file():
     if not os.path.isdir(UPLOAD_FOLDER):
         return f"bad upload path: {UPLOAD_FOLDER}"
 
-    file_path = os.path.join(UPLOAD_FOLDER, r.uniq_file_name)
-    file_content = file2data(file_path)
 
     ext = os.path.splitext(r.orig_file_name)
     tru_ext = ext[1].lower() if len(ext) and len(ext[1]) else ""
@@ -71,7 +69,8 @@ def p4wdownload_file():
         if not file_type is None and tru_ext.endswith(view_in_browser)
         else f'attachment; filename="{r.orig_file_name}"'
     )
-    return file_content
+
+    return file2data(os.path.join(UPLOAD_FOLDER, r.uniq_file_name))
 
 
 @action("p4wdelete_file", method=["GET", "POST"])
