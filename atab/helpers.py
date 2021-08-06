@@ -46,7 +46,7 @@ def file2data(fnm, mode="rb"):
             data = f.read()
     except IOError:
         print("file2data: IOError")
-        data = f"Error file2data: File {r.orig_file_name} {file_path} does not appear to exist"
+        data = f"Error file2data: File {fnm} does not appear to exist"
     return data
 
 
