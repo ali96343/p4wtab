@@ -23,7 +23,7 @@ from .upload_utils import p4wupload_file
 from .tlist_utils import tlist 
 
 from yatl.helpers import A
-from . common import db, session, T, cache, auth , url_signer 
+from . common import db, session, T, cache, auth  
 
 
 
@@ -35,9 +35,9 @@ def index():
     message = T("Hello {first_name}".format(**user) if user else "Hello")
     menu = DIV(
                P( "test-demo for sql2table ( SQLTABLE from web2py)"),
-               A( "sql2table", _role="button", _href=URL('mytab_grid', signer=url_signer   ),) ,
-               A( "p4wupload_file", _role="button", _href=URL('p4wupload_file', signer=url_signer ),) ,
-               A( "tlist", _role="button", _href=URL('tlist', signer=url_signer ),) ,
+               A( "sql2table", _role="button", _href=URL('mytab_grid',  ),) ,
+               A( "p4wupload_file", _role="button", _href=URL('p4wupload_file', ),) ,
+               A( "tlist", _role="button", _href=URL('tlist',  ),) ,
               )
     return dict(message=message, menu=menu)
 
